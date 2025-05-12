@@ -14,11 +14,7 @@ function setUsage(val) {
   localStorage.setItem(todayKey, val);
 }
 
-let usage = getUsage();
-if (isNaN(usage)) {
-  usage = 0;
-  setUsage(usage);
-}
+let usage = 0;
 
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
@@ -44,27 +40,43 @@ function updateLanguageOptions() {
       langSelect.appendChild(el);
     }
   });
-  langSelect.value = "zh-tw";
+  if (langSelect.options.length > 0) {
+    langSelect.value = langSelect.options[0].value;
+  }
+
   document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
 }
 
 document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
-document.addEventListener("DOMContentLoaded", updateLanguageOptions);
+
+document.addEventListener("DOMContentLoaded", () => {
+  usage = getUsage();
+  if (isNaN(usage)) {
+    usage = 0;
+    setUsage(usage);
+  }
+  updateLanguageOptions();
+});
 
 async function generateSpeech() {
   const button = document.querySelector("button");
   button.disabled = true;
 
-  const text = document.getElementById("textInput").value;
+  const text = document.getElementById("textInput").value.trim();
   const lang = document.getElementById("langSelect").value;
   const isPro = document.getElementById("proToggle").checked;
+
+  if (!text) {
+    alert("請輸入文字後再產生語音");
+    button.disabled = false;
+    return;
+  }
 
   usage = getUsage();
   if (isNaN(usage)) {
     usage = 0;
     setUsage(usage);
   }
-  document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
 
   const freeLangs = ["en", "zh-tw", "ja"];
   if (!isPro) {
@@ -96,6 +108,7 @@ async function generateSpeech() {
   const url = URL.createObjectURL(blob);
   const audio = new Audio(url);
   audio.play();
+  audio.onended = () => URL.revokeObjectURL(url);
   button.disabled = false;
 
   if (!isPro) {
