@@ -7,9 +7,18 @@ async function generateSpeech() {
   const lang = document.getElementById("langSelect").value;
   const isPro = document.getElementById("proToggle").checked;
 
-  if (!isPro && usage >= MAX_USES) {
-    alert("今日免費額度已用完，請升級帳號。");
-    return;
+  document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+
+  const freeLangs = ["en", "zh-tw", "ja"];
+  if (!isPro) {
+    if (usage >= MAX_USES) {
+      alert("今日免費額度已用完，請升級帳號。");
+      return;
+    }
+    if (!freeLangs.includes(lang)) {
+      alert("免費版僅支援 English、中文（台灣）、Japanese");
+      return;
+    }
   }
 
   const res = await fetch("/api/tts", {
@@ -31,5 +40,6 @@ async function generateSpeech() {
   if (!isPro) {
     usage++;
     localStorage.setItem(todayKey, usage);
+    document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
   }
 }
