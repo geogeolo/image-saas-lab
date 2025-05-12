@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <title>AI 語音合成 SaaS</title>
@@ -7,17 +7,18 @@
 </head>
 <body>
   <h1>文字轉語音服務</h1>
+
   <label><input type="checkbox" id="proToggle"> Pro 模式</label><br><br>
+
   <textarea id="textInput" rows="4" cols="50" placeholder="請輸入要轉語音的文字"></textarea><br><br>
+
   <label for="langSelect">語言：</label>
-  <select id="langSelect">
-    <option value="en">English</option>
-    <option value="zh-tw">中文（台灣）</option>
-    <option value="ja">日本語</option>
-    <option value="fr">Français</option>
-  </select><br><br>
-  <button onclick="generateSpeech()">產生語音</button>
+  <select id="langSelect"></select><br><br>
+
   <p id="usageDisplay">目前使用次數：0/5</p>
+
+  <button onclick="generateSpeech()">產生語音</button>
+
   <script src="script.js"></script>
 </body>
 </html>
