@@ -1,6 +1,9 @@
 const MAX_USES = 5;
 const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
-let usage = parseInt(localStorage.getItem(todayKey) || "0");
+if (!localStorage.getItem(todayKey)) {
+  localStorage.setItem(todayKey, "0");
+}
+let usage = parseInt(localStorage.getItem(todayKey));
 
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
