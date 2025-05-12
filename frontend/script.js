@@ -7,22 +7,33 @@ function getTodayDate() {
 }
 
 function getUsage() {
-  const storedDate = localStorage.getItem(DATE_KEY);
   const today = getTodayDate();
+  const storedDate = localStorage.getItem(DATE_KEY);
+  const rawUsage = localStorage.getItem(USAGE_KEY);
 
-  if (storedDate !== today) {
+  console.log("[getUsage] today =", today, "storedDate =", storedDate, "rawUsage =", rawUsage);
+
+  // 日期不同，或不存在 → 重設
+  if (!storedDate || storedDate !== today) {
+    console.log("[getUsage] Resetting usage due to date mismatch or missing date");
     localStorage.setItem(DATE_KEY, today);
-    localStorage.setItem(USAGE_KEY, '0');
+    localStorage.setItem(USAGE_KEY, "0");
     return 0;
   }
 
-  const raw = localStorage.getItem(USAGE_KEY);
-  const usage = parseInt(raw, 10);
-  return isNaN(usage) ? 0 : usage;
+  const usage = parseInt(rawUsage, 10);
+  if (isNaN(usage) || usage < 0 || usage > MAX_USES) {
+    console.log("[getUsage] Invalid usage value, resetting to 0");
+    localStorage.setItem(USAGE_KEY, "0");
+    return 0;
+  }
+
+  return usage;
 }
 
 function setUsage(val) {
   localStorage.setItem(USAGE_KEY, val.toString());
+  console.log("[setUsage] usage set to", val);
 }
 
 function updateLanguageOptions() {
@@ -69,6 +80,7 @@ function updateLanguageOptions() {
 document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("[DOMContentLoaded] Initializing");
   updateLanguageOptions();
 });
 
@@ -102,6 +114,8 @@ async function generateSpeech() {
     }
   }
 
+  console.log("[generateSpeech] Sending TTS request for lang:", lang, "text:", text);
+
   const res = await fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -110,6 +124,7 @@ async function generateSpeech() {
 
   if (!res.ok) {
     alert("語音合成失敗");
+    console.error("[generateSpeech] API error", await res.text());
     button.disabled = false;
     return;
   }
