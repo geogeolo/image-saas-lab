@@ -1,17 +1,21 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, send_from_directory
 from gtts import gTTS
 import tempfile
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
 @app.route("/favicon.ico")
 def favicon():
     return "", 204
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def index():
-    return "AI TTS SaaS is running. Use POST /api/tts"
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory(app.static_folder, path)
 
 @app.route("/api/tts", methods=["POST"])
 def tts():
