@@ -1,8 +1,0 @@
-{
-  "name": "ai-video-saas-lab",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "replicate": "^0.17.4"
-  }
-}
