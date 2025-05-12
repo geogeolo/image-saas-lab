@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AI Image Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>AI 圖像生成器</h1>
+  <label><input type="checkbox" id="proToggle"> 模擬 Pro 版本（無浮水印）</label><br><br>
+  <input type="text" id="prompt" placeholder="請輸入提示詞">
+  <button onclick="handleGenerate()">產生圖片</button>
+  <p id="message"></p>
+  <img id="result" />
+  <h2>Prompt 歷史紀錄</h2>
+  <ul id="history"></ul>
+  <script src="script.js"></script>
+</body>
+</html>
