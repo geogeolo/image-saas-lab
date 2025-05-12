@@ -41,4 +41,3 @@ async function handleGenerate() {
     console.error("handleGenerate() 錯誤：", err);
   }
 }
-}
