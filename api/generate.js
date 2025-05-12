@@ -14,15 +14,16 @@ export default async function handler(req, res) {
 
     const videoUrl = Array.isArray(output) ? output[0] : output;
     const response = await fetch(videoUrl);
+
     if (!response.ok) {
-      throw new Error(`fetch video failed: ${response.statusText}`);
+      throw new Error(`Fetch video failed: ${response.status} ${response.statusText}`);
     }
 
     const buffer = await response.arrayBuffer();
     res.setHeader("Content-Type", "video/mp4");
     res.send(Buffer.from(buffer));
   } catch (err) {
-    console.error("Replicate function error:", err);
+    console.error("generate.js error:", err);
     res.status(500).send("伺服器錯誤：" + err.message);
   }
 }
