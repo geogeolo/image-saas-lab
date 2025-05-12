@@ -1,6 +1,5 @@
 const MAX_USES = 5;
 const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
-
 function getUsage() {
   let raw = localStorage.getItem(todayKey);
   if (raw === null || isNaN(parseInt(raw))) {
@@ -9,63 +8,24 @@ function getUsage() {
   }
   return parseInt(raw);
 }
-
 function setUsage(val) {
   localStorage.setItem(todayKey, val);
 }
-
 let usage = getUsage();
-
-function updateLanguageOptions() {
-  const isPro = document.getElementById("proToggle").checked;
-  const langSelect = document.getElementById("langSelect");
-  const options = [
-    { value: "en", label: "English" },
-    { value: "zh-tw", label: "中文（台灣）" },
-    { value: "ja", label: "日本語" },
-    { value: "fr", label: "Français" },
-    { value: "de", label: "Deutsch" },
-    { value: "ko", label: "한국어" },
-    { value: "es", label: "Español" },
-    { value: "hi", label: "Hindi" },
-    { value: "id", label: "Bahasa Indonesia" },
-    { value: "vi", label: "Tiếng Việt" }
-  ];
-  langSelect.innerHTML = "";
-  options.forEach(opt => {
-    if (isPro || ["en", "zh-tw", "ja"].includes(opt.value)) {
-      const el = document.createElement("option");
-      el.value = opt.value;
-      el.textContent = opt.label;
-      langSelect.appendChild(el);
-    }
-  });
+if (isNaN(usage)) {
+  usage = 0;
+  setUsage(usage);
 }
-
-document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
-document.addEventListener("DOMContentLoaded", updateLanguageOptions);
-
-async function generateSpeech() {
-  const button = document.querySelector("button");
-  button.disabled = true;
-
-  const text = document.getElementById("textInput").value;
-  const lang = document.getElementById("langSelect").value;
-  const isPro = document.getElementById("proToggle").checked;
-
-  usage = getUsage();
-  document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
 
   const freeLangs = ["en", "zh-tw", "ja"];
   if (!isPro) {
     if (usage >= MAX_USES) {
       alert("今日免費額度已用完，請升級帳號。");
-      button.disabled = false;
       return;
     }
     if (!freeLangs.includes(lang)) {
       alert("免費版僅支援 English、中文（台灣）、Japanese");
-      button.disabled = false;
       return;
     }
   }
@@ -92,6 +52,6 @@ async function generateSpeech() {
     usage++;
     setUsage(usage);
     usage = getUsage();
-    document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
   }
 }
