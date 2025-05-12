@@ -1,20 +1,29 @@
 const MAX_USES = 5;
-const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
+const USAGE_KEY = 'usage';
+const DATE_KEY = 'usageDate';
+
+function getTodayDate() {
+  return new Date().toISOString().split('T')[0];
+}
 
 function getUsage() {
-  let raw = localStorage.getItem(todayKey);
-  if (raw === null || isNaN(parseInt(raw))) {
-    localStorage.setItem(todayKey, "0");
+  const storedDate = localStorage.getItem(DATE_KEY);
+  const today = getTodayDate();
+
+  if (storedDate !== today) {
+    localStorage.setItem(DATE_KEY, today);
+    localStorage.setItem(USAGE_KEY, '0');
     return 0;
   }
-  return parseInt(raw);
+
+  const raw = localStorage.getItem(USAGE_KEY);
+  const usage = parseInt(raw, 10);
+  return isNaN(usage) ? 0 : usage;
 }
 
 function setUsage(val) {
-  localStorage.setItem(todayKey, val);
+  localStorage.setItem(USAGE_KEY, val.toString());
 }
-
-let usage = 0;
 
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
@@ -44,17 +53,13 @@ function updateLanguageOptions() {
     langSelect.value = langSelect.options[0].value;
   }
 
+  const usage = getUsage();
   document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
 }
 
 document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
 
 document.addEventListener("DOMContentLoaded", () => {
-  usage = getUsage();
-  if (isNaN(usage)) {
-    usage = 0;
-    setUsage(usage);
-  }
   updateLanguageOptions();
 });
 
@@ -72,11 +77,7 @@ async function generateSpeech() {
     return;
   }
 
-  usage = getUsage();
-  if (isNaN(usage)) {
-    usage = 0;
-    setUsage(usage);
-  }
+  let usage = getUsage();
 
   const freeLangs = ["en", "zh-tw", "ja"];
   if (!isPro) {
@@ -114,7 +115,6 @@ async function generateSpeech() {
   if (!isPro) {
     usage++;
     setUsage(usage);
-    usage = getUsage();
     document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
   }
 }
