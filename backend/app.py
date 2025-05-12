@@ -13,24 +13,6 @@ def favicon():
 def index():
     return "AI TTS SaaS is running. Use POST /api/tts"
 
-from flask import Flask, request, send_file
-from gtts import gTTS
-import tempfile
-import os
-
-app = Flask(__name__)
-
-@app.route("/", methods=["GET"])
-def index():
-    return "AI TTS SaaS is running. Use POST /api/tts"
-
-from flask import Flask, request, send_file
-from gtts import gTTS
-import tempfile
-import os
-
-app = Flask(__name__)
-
 @app.route("/api/tts", methods=["POST"])
 def tts():
     data = request.get_json()
