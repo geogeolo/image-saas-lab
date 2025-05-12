@@ -1,8 +1,12 @@
 const MAX_USES = 5;
 const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
 function getUsage() {
-  const stored = parseInt(localStorage.getItem(todayKey));
-  return isNaN(stored) ? 0 : stored;
+  let raw = localStorage.getItem(todayKey);
+  if (raw === null || isNaN(parseInt(raw))) {
+    localStorage.setItem(todayKey, "0");
+    return 0;
+  }
+  return parseInt(raw);
 }
 function setUsage(val) {
   localStorage.setItem(todayKey, val);
