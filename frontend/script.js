@@ -28,6 +28,8 @@ function setUsage(val) {
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
   const langSelect = document.getElementById("langSelect");
+  const usageDisplay = document.getElementById("usageDisplay");
+
   const options = [
     { value: "zh-tw", label: "中文（台灣）" },
     { value: "en", label: "English" },
@@ -40,6 +42,7 @@ function updateLanguageOptions() {
     { value: "id", label: "Bahasa Indonesia" },
     { value: "vi", label: "Tiếng Việt" }
   ];
+
   langSelect.innerHTML = "";
   options.forEach(opt => {
     if (isPro || ["zh-tw", "en", "ja"].includes(opt.value)) {
@@ -49,12 +52,18 @@ function updateLanguageOptions() {
       langSelect.appendChild(el);
     }
   });
+
   if (langSelect.options.length > 0) {
     langSelect.value = langSelect.options[0].value;
   }
 
-  const usage = getUsage();
-  document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+  if (isPro) {
+    usageDisplay.style.display = "none";
+  } else {
+    const usage = getUsage();
+    usageDisplay.style.display = "block";
+    usageDisplay.innerText = `目前使用次數：${usage}/${MAX_USES}`;
+  }
 }
 
 document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
