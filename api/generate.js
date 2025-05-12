@@ -1,18 +1,18 @@
+import Replicate from "replicate";
+
 export default async function handler(req, res) {
   const { prompt } = req.body;
-  const hf_token = process.env.HUGGINGFACE_TOKEN;
+  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
-  const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${hf_token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ inputs: prompt })
+  const output = await replicate.run("pixverse/pixverse-v4", {
+    input: {
+      prompt: prompt,
+      quality: "1080p"
+    }
   });
 
-  const blob = await response.blob();
-  const buffer = await blob.arrayBuffer();
-  res.setHeader("Content-Type", "image/png");
+  const response = await fetch(output);
+  const buffer = await response.arrayBuffer();
+  res.setHeader("Content-Type", "video/mp4");
   res.send(Buffer.from(buffer));
 }
