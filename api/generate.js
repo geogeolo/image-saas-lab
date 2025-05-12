@@ -13,7 +13,6 @@ export default async function handler(req, res) {
     });
 
     const videoUrl = Array.isArray(output) ? output[0] : output;
-
     const response = await fetch(videoUrl);
     if (!response.ok) {
       throw new Error(`fetch video failed: ${response.statusText}`);
