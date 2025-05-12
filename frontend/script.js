@@ -1,9 +1,13 @@
 const MAX_USES = 5;
 const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
-if (!localStorage.getItem(todayKey)) {
-  localStorage.setItem(todayKey, "0");
+function getUsage() {
+  const stored = parseInt(localStorage.getItem(todayKey));
+  return isNaN(stored) ? 0 : stored;
 }
-let usage = parseInt(localStorage.getItem(todayKey));
+function setUsage(val) {
+  localStorage.setItem(todayKey, val);
+}
+let usage = getUsage();
 
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
@@ -39,7 +43,8 @@ async function generateSpeech() {
   const lang = document.getElementById("langSelect").value;
   const isPro = document.getElementById("proToggle").checked;
 
-  document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+  usage = getUsage();
+document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
 
   const freeLangs = ["en", "zh-tw", "ja"];
   if (!isPro) {
@@ -71,7 +76,8 @@ async function generateSpeech() {
 
   if (!isPro) {
     usage++;
-    localStorage.setItem(todayKey, usage);
-    document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
+    setUsage(usage);
+    usage = getUsage();
+document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
   }
 }
