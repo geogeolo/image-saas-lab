@@ -1,0 +1,6 @@
+body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+input { width: 300px; padding: 10px; }
+button { padding: 10px 20px; margin-left: 10px; }
+img { margin-top: 20px; max-width: 80%; border: 2px solid #ccc; }
+ul { list-style: none; padding: 0; }
+li { margin-top: 8px; }
