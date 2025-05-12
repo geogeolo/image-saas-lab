@@ -26,7 +26,7 @@ async function handleGenerate() {
     }
 
     const blob = await res.blob();
-    displayImage(blob, !isPro);
+    displayVideo(blob, !isPro);
 
     if (!isPro) {
       usage++;
@@ -36,6 +36,35 @@ async function handleGenerate() {
     promptHistory.unshift(prompt);
     localStorage.setItem("promptHistory", JSON.stringify(promptHistory));
     renderHistory();
+  } catch (err) {
+    document.getElementById("message").innerText = `發生錯誤：${err.message}`;
+    console.error("handleGenerate() 錯誤：", err);
+  }
+}
+
+function displayVideo(blob, addWatermark) {
+  const video = document.getElementById("result-video");
+  const url = URL.createObjectURL(blob);
+  video.src = url;
+  video.style.display = "block";
+  video.autoplay = true;
+  video.controls = true;
+
+  if (addWatermark) {
+    const overlay = document.createElement("div");
+    overlay.innerText = "Free Version";
+    overlay.style.position = "absolute";
+    overlay.style.bottom = "10px";
+    overlay.style.left = "10px";
+    overlay.style.background = "rgba(255, 255, 255, 0.7)";
+    overlay.style.padding = "4px 8px";
+    overlay.style.fontSize = "20px";
+    overlay.style.color = "#000";
+    overlay.style.borderRadius = "5px";
+    overlay.style.zIndex = "1000";
+    document.body.appendChild(overlay);
+  }
+
   } catch (err) {
     document.getElementById("message").innerText = `發生錯誤：${err.message}`;
     console.error("handleGenerate() 錯誤：", err);
