@@ -64,9 +64,22 @@ function displayVideo(blob, addWatermark) {
     overlay.style.zIndex = "1000";
     document.body.appendChild(overlay);
   }
-
-  } catch (err) {
-    document.getElementById("message").innerText = `發生錯誤：${err.message}`;
-    console.error("handleGenerate() 錯誤：", err);
-  }
 }
+
+function renderHistory() {
+  const list = document.getElementById("history");
+  list.innerHTML = "";
+  promptHistory.forEach(p => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.innerText = "重用";
+    btn.onclick = () => {
+      document.getElementById("prompt").value = p;
+    };
+    li.innerText = p;
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+renderHistory();
