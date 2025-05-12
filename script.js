@@ -26,7 +26,7 @@ async function handleGenerate() {
     }
 
     const blob = await res.blob();
-    displayVideo(blob, !isPro);
+    displayImage(blob, !isPro);
 
     if (!isPro) {
       usage++;
@@ -42,44 +42,20 @@ async function handleGenerate() {
   }
 }
 
-function displayVideo(blob, addWatermark) {
-  const video = document.getElementById("result-video");
-  const url = URL.createObjectURL(blob);
-  video.src = url;
-  video.style.display = "block";
-  video.autoplay = true;
-  video.controls = true;
-
-  if (addWatermark) {
-    const overlay = document.createElement("div");
-    overlay.innerText = "Free Version";
-    overlay.style.position = "absolute";
-    overlay.style.bottom = "10px";
-    overlay.style.left = "10px";
-    overlay.style.background = "rgba(255, 255, 255, 0.7)";
-    overlay.style.padding = "4px 8px";
-    overlay.style.fontSize = "20px";
-    overlay.style.color = "#000";
-    overlay.style.borderRadius = "5px";
-    overlay.style.zIndex = "1000";
-    document.body.appendChild(overlay);
-  }
+function displayImage(blob, addWatermark) {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    if (addWatermark) {
+      ctx.font = "48px Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fillText("Free Version", 20, img.height - 50);
+    }
+    document.getElementById("result-image").src = canvas.toDataURL();
+  };
+  img.src = URL.createObjectURL(blob);
 }
-
-function renderHistory() {
-  const list = document.getElementById("history");
-  list.innerHTML = "";
-  promptHistory.forEach(p => {
-    const li = document.createElement("li");
-    const btn = document.createElement("button");
-    btn.innerText = "重用";
-    btn.onclick = () => {
-      document.getElementById("prompt").value = p;
-    };
-    li.innerText = p;
-    li.appendChild(btn);
-    list.appendChild(li);
-  });
-}
-
-renderHistory();
