@@ -2,6 +2,20 @@ const MAX_USES = 5;
 const USAGE_KEY = 'usage';
 const DATE_KEY = 'usageDate';
 
+// LibreTranslate 使用的語言代碼對照
+const langCodeMap = {
+  "zh-tw": "zh",
+  "en": "en",
+  "ja": "ja",
+  "fr": "fr",
+  "de": "de",
+  "ko": "ko",
+  "es": "es",
+  "hi": "hi",
+  "id": "id",
+  "vi": "vi"
+};
+
 function getTodayDate() {
   return new Date().toISOString().split('T')[0];
 }
@@ -13,7 +27,6 @@ function getUsage() {
 
   console.log("[getUsage] today =", today, "storedDate =", storedDate, "rawUsage =", rawUsage);
 
-  // 日期不同，或不存在 → 重設
   if (!storedDate || storedDate !== today) {
     console.log("[getUsage] Resetting usage due to date mismatch or missing date");
     localStorage.setItem(DATE_KEY, today);
@@ -84,6 +97,32 @@ document.addEventListener("DOMContentLoaded", () => {
   updateLanguageOptions();
 });
 
+async function translateText(text, targetLangCode) {
+  try {
+    const res = await fetch("https://libretranslate.de/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        q: text,
+        source: "auto",
+        target: targetLangCode,
+        format: "text"
+      })
+    });
+
+    if (!res.ok) {
+      console.error("翻譯失敗", await res.text());
+      return text;
+    }
+
+    const data = await res.json();
+    return data.translatedText;
+  } catch (err) {
+    console.error("翻譯過程錯誤", err);
+    return text;
+  }
+}
+
 async function generateSpeech() {
   const button = document.querySelector("button");
   button.disabled = true;
@@ -114,12 +153,14 @@ async function generateSpeech() {
     }
   }
 
-  console.log("[generateSpeech] Sending TTS request for lang:", lang, "text:", text);
+  const targetLangCode = langCodeMap[lang] || "en";
+  const translated = await translateText(text, targetLangCode);
+  console.log("翻譯後文字：", translated);
 
   const res = await fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, lang })
+    body: JSON.stringify({ text: translated, lang: lang })
   });
 
   if (!res.ok) {
