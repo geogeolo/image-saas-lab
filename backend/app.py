@@ -9,6 +9,8 @@ app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
 HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 HF_API_KEY = os.environ.get("HF_API_KEY")  # 請設定你的 Hugging Face Token 環境變數
+print("[BOOT] HF_API_KEY is set:", bool(HF_API_KEY))
+
 
 @app.route("/")
 def index():
