@@ -6,28 +6,26 @@ body {
 }
 
 .container {
-  max-width: 600px;
-  margin: 0 auto;
+  background: #fff;
   padding: 20px;
-  background: white;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
   border-radius: 8px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
 }
 
 textarea {
   width: 100%;
-  padding: 12px;
   font-size: 16px;
+  padding: 10px;
   margin-top: 10px;
 }
 
-section {
-  margin-bottom: 20px;
+select {
+  width: 200px;
+  font-size: 16px;
+  padding: 6px;
+  margin: 10px;
 }
 
 button {
@@ -36,24 +34,17 @@ button {
   margin: 10px 0;
   padding: 12px;
   font-size: 16px;
-  border: none;
-  background-color: #333;
+  background: #333;
   color: white;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #555;
+  background: #555;
 }
 
-label {
-  margin-right: 10px;
+section {
+  margin-top: 20px;
 }
-
-select {
-  width: 200px;
-  padding: 6px;
-  font-size: 16px;
-}
-
