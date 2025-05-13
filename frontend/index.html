@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -6,18 +7,18 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
- <h1>文字轉語音服務</h1>
-<label><input type="checkbox" id="proToggle"> Pro 模式</label><br><br>
-<textarea id="textInput" rows="4" cols="50" placeholder="請輸入要轉語音的文字"></textarea><br><br>
-<label for="langSelect">語言：</label>
-<select id="langSelect"></select><br><br>
-<label><input type="checkbox" id="slowToggle"> 慢速朗讀</label><br><br>
-<p id="usageDisplay">目前使用次數：0/5</p>
-<button type="button" onclick="generateSpeech()">產生語音</button>
-  <br><br>
-<button type="button" id="downloadBtn" style="display:none;">下載語音</button>
-<br><br>
-<button type="button" onclick="resetUsage()">重設今日使用次數</button>
-<script src="script.js"></script>
+  <h1>文字轉語音服務</h1>
+  <label><input type="checkbox" id="proToggle"> Pro 模式</label><br><br>
+  <textarea id="textInput" rows="4" cols="50" placeholder="請輸入要轉語音的文字"></textarea><br><br>
+  <label for="langSelect">語言：</label>
+  <select id="langSelect"></select><br><br>
+  <label><input type="checkbox" id="slowToggle"> 慢速朗讀</label><br><br>
+  <p id="usageDisplay">目前使用次數：0/5</p>
+  <button type="button" onclick="generateSpeech()">產生語音</button><br><br>
+  <button id="downloadBtn" style="display:none;">下載語音</button><br><br>
+  <button onclick="resetUsage()">重設今日使用次數</button><br><br>
+  <a href="dialogue.html"><button>前往對話模擬器</button></a>
+
+  <script src="script.js"></script>
 </body>
 </html>
