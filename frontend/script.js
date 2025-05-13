@@ -79,6 +79,7 @@ async function generateSpeech() {
   const inputText = document.getElementById("textInput").value.trim();
   const selectedLang = document.getElementById("langSelect").value;
   const isPro = document.getElementById("proToggle").checked;
+  const slow = document.getElementById("slowToggle").checked;
 
   if (!inputText) {
     alert("請輸入文字後再產生語音");
@@ -104,7 +105,11 @@ async function generateSpeech() {
   const res = await fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: inputText, lang: selectedLang })
+    body: JSON.stringify({
+      text: inputText,
+      lang: selectedLang,
+      slow: slow
+    })
   });
 
   if (!res.ok) {
