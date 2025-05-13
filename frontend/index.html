@@ -14,6 +14,10 @@
 <label><input type="checkbox" id="slowToggle"> 慢速朗讀</label><br><br>
 <p id="usageDisplay">目前使用次數：0/5</p>
 <button type="button" onclick="generateSpeech()">產生語音</button>
+  <br><br>
+<button type="button" id="downloadBtn" style="display:none;">下載語音</button>
+<br><br>
+<button type="button" onclick="resetUsage()">重設今日使用次數</button>
 <script src="script.js"></script>
 </body>
 </html>
