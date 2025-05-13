@@ -1,0 +1,65 @@
+<!-- dialogue.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>語音情境模擬器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>語音情境模擬器</h1>
+
+  <textarea id="dialogueInput" rows="4" cols="50" placeholder="請輸入一句話，例如：我想買咖啡"></textarea><br><br>
+  <button onclick="simulateDialogue()">生成情境並播放</button>
+
+  <p id="dialogueResult" style="white-space: pre-wrap; margin-top: 20px;"></p>
+
+  <script>
+    async function simulateDialogue() {
+      const inputText = document.getElementById("dialogueInput").value.trim();
+      if (!inputText) {
+        alert("請輸入一句話");
+        return;
+      }
+
+      // 呼叫 /api/dialogue 取得補全對話文字
+      const res = await fetch("/api/dialogue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: inputText })
+      });
+
+      if (!res.ok) {
+        alert("無法生成對話，請稍後再試");
+        return;
+      }
+
+      const data = await res.json();
+      const dialogue = data.dialogue || "";
+      document.getElementById("dialogueResult").innerText = dialogue;
+
+      // 呼叫 TTS 撥放語音
+      const ttsRes = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: dialogue,
+          lang: "zh-tw",
+          slow: false
+        })
+      });
+
+      if (!ttsRes.ok) {
+        alert("語音播放失敗");
+        return;
+      }
+
+      const blob = await ttsRes.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+      audio.onended = () => URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
