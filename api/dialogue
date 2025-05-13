@@ -1,27 +1,25 @@
 @app.route("/api/dialogue", methods=["POST"])
 def generate_dialogue():
-    data = request.get_json()
-    user_input = data.get("text", "")
-    if not user_input:
-        return {"error": "No input provided."}, 400
+    try:
+        data = request.get_json()
+        user_input = data.get("text", "")
+        if not user_input:
+            return {"error": "No input provided."}, 400
 
-    # 給 LLM 的 prompt：請補全對話
-    prompt = f"請將這句話補成一段自然對話：{user_input}"
+        prompt = f"請將這句話補成一段自然對話：{user_input}"
 
-    headers = {
-        "Authorization": f"Bearer {HF_API_KEY}",  # 從環境變數取得 Hugging Face Token
-        "Content-Type": "application/json"
-    }
-    payload = {"inputs": prompt}
+        headers = {
+            "Authorization": f"Bearer {HF_API_KEY}",
+            "Content-Type": "application/json"
+        }
 
-    # 呼叫 Hugging Face 模型 API
-    res = requests.post(HF_API_URL, headers=headers, json=payload, timeout=30)
-
-    if res.status_code != 200:
-        return {"error": "HuggingFace API failed", "status_code": res.status_code}, 500
-
-    # 解析回應
-    result = res.json()
-    output = result[0].get("generated_text", "") if isinstance(result, list) else result.get("generated_text", "")
-
-    return {"dialogue": output.strip()}
+        res = requests.post(HF_API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
+        res.raise_for_status()  # <--- 讓它丟出 HTTP 例外
+        
+        result = res.json()
+        output = result[0].get("generated_text", "") if isinstance(result, list) else result.get("generated_text", "")
+        return {"dialogue": output.strip()}
+    
+    except Exception as e:
+        print("Hugging Face API failed:", str(e))
+        return {"error": f"HuggingFace error: {str(e)}"}, 500
