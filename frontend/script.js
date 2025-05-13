@@ -66,6 +66,12 @@ function updateLanguageOptions() {
   }
 }
 
+function resetUsage() {
+  setUsage(0);
+  document.getElementById("usageDisplay").innerText = `目前使用次數：0/${MAX_USES}`;
+  alert("已重設今日使用次數。");
+}
+
 document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -74,7 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function generateSpeech() {
   const button = document.querySelector("button");
+  const downloadBtn = document.getElementById("downloadBtn");
   button.disabled = true;
+  downloadBtn.style.display = "none";
 
   const inputText = document.getElementById("textInput").value.trim();
   const selectedLang = document.getElementById("langSelect").value;
@@ -125,6 +133,15 @@ async function generateSpeech() {
   audio.play();
   audio.onended = () => URL.revokeObjectURL(url);
   button.disabled = false;
+
+  // 顯示下載按鈕
+  downloadBtn.onclick = () => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tts.mp3";
+    a.click();
+  };
+  downloadBtn.style.display = "inline-block";
 
   if (!isPro) {
     usage++;
