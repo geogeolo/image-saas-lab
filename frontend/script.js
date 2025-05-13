@@ -1,34 +1,40 @@
 const MAX_USES = 5;
-const USAGE_KEY = 'usage';
-const DATE_KEY = 'usageDate';
-
-function getTodayDate() {
-  return new Date().toISOString().split('T')[0];
-}
+const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
 
 function getUsage() {
-  const today = getTodayDate();
-  const storedDate = localStorage.getItem(DATE_KEY);
-  const rawUsage = localStorage.getItem(USAGE_KEY);
-
-  if (!storedDate || storedDate !== today) {
-    localStorage.setItem(DATE_KEY, today);
-    localStorage.setItem(USAGE_KEY, "0");
+  const raw = localStorage.getItem(todayKey);
+  const parsed = parseInt(raw);
+  if (isNaN(parsed)) {
+    localStorage.setItem(todayKey, "0");
     return 0;
   }
-
-  const usage = parseInt(rawUsage, 10);
-  return isNaN(usage) || usage < 0 || usage > MAX_USES ? 0 : usage;
+  return parsed;
 }
 
 function setUsage(val) {
-  localStorage.setItem(USAGE_KEY, val.toString());
+  localStorage.setItem(todayKey, val);
+}
+
+function resetUsage() {
+  setUsage(0);
+  usage = getUsage();
+  updateUsageDisplay();
+  alert("已重設今日使用次數！");
+}
+
+function updateUsageDisplay() {
+  const usageDisplay = document.getElementById("usageDisplay");
+  if (document.getElementById("proToggle").checked) {
+    usageDisplay.style.display = "none";
+  } else {
+    usageDisplay.style.display = "block";
+    usageDisplay.innerText = `目前使用次數：${usage}/${MAX_USES}`;
+  }
 }
 
 function updateLanguageOptions() {
   const isPro = document.getElementById("proToggle").checked;
   const langSelect = document.getElementById("langSelect");
-  const usageDisplay = document.getElementById("usageDisplay");
 
   const options = [
     { value: "zh-tw", label: "中文（台灣）" },
@@ -44,6 +50,7 @@ function updateLanguageOptions() {
   ];
 
   langSelect.innerHTML = "";
+
   options.forEach(opt => {
     if (isPro || ["zh-tw", "en", "ja"].includes(opt.value)) {
       const el = document.createElement("option");
@@ -53,99 +60,78 @@ function updateLanguageOptions() {
     }
   });
 
-  if (langSelect.options.length > 0) {
-    langSelect.value = langSelect.options[0].value;
-  }
-
-  if (isPro) {
-    usageDisplay.style.display = "none";
-  } else {
-    const usage = getUsage();
-    usageDisplay.style.display = "block";
-    usageDisplay.innerText = `目前使用次數：${usage}/${MAX_USES}`;
-  }
+  langSelect.value = "zh-tw";
+  updateUsageDisplay();
 }
-
-function resetUsage() {
-  setUsage(0);
-  document.getElementById("usageDisplay").innerText = `目前使用次數：0/${MAX_USES}`;
-  alert("已重設今日使用次數。");
-}
-
-document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
-
-document.addEventListener("DOMContentLoaded", () => {
-  updateLanguageOptions();
-});
 
 async function generateSpeech() {
   const button = document.querySelector("button");
-  const downloadBtn = document.getElementById("downloadBtn");
   button.disabled = true;
-  downloadBtn.style.display = "none";
 
-  const inputText = document.getElementById("textInput").value.trim();
-  const selectedLang = document.getElementById("langSelect").value;
+  const text = document.getElementById("textInput").value.trim();
+  const lang = document.getElementById("langSelect").value;
   const isPro = document.getElementById("proToggle").checked;
-  const slow = document.getElementById("slowToggle").checked;
+  const slow = document.getElementById("slowRead").checked;
 
-  if (!inputText) {
-    alert("請輸入文字後再產生語音");
+  console.log("[DEBUG] text:", text);
+  console.log("[DEBUG] lang:", lang);
+  console.log("[DEBUG] slow:", slow);
+  console.log("[DEBUG] isPro:", isPro);
+
+  if (!text) {
+    alert("請輸入文字");
     button.disabled = false;
     return;
   }
 
-  let usage = getUsage();
-  const freeLangs = ["en", "zh-tw", "ja"];
   if (!isPro) {
+    usage = getUsage();
     if (usage >= MAX_USES) {
       alert("今日免費額度已用完，請升級帳號。");
       button.disabled = false;
       return;
     }
-    if (!freeLangs.includes(selectedLang)) {
-      alert("免費版僅支援 English、中文（台灣）、Japanese");
+    if (!["zh-tw", "en", "ja"].includes(lang)) {
+      alert("免費版僅支援 English、中文（台灣）、日本語");
       button.disabled = false;
       return;
     }
   }
 
-  const res = await fetch("/api/tts", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: inputText,
-      lang: selectedLang,
-      slow: slow
-    })
-  });
+  try {
+    const res = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, lang, slow })
+    });
 
-  if (!res.ok) {
-    alert("語音合成失敗");
-    console.error("[generateSpeech] API error", await res.text());
-    button.disabled = false;
-    return;
+    if (!res.ok) {
+      alert("語音合成失敗");
+      button.disabled = false;
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+
+    if (!isPro) {
+      usage++;
+      setUsage(usage);
+      updateUsageDisplay();
+    }
+  } catch (err) {
+    console.error("[ERROR] 語音請求失敗:", err);
+    alert("發生錯誤，請稍後再試");
   }
 
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const audio = new Audio(url);
-  audio.play();
-  audio.onended = () => URL.revokeObjectURL(url);
   button.disabled = false;
-
-  // 顯示下載按鈕
-  downloadBtn.onclick = () => {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tts.mp3";
-    a.click();
-  };
-  downloadBtn.style.display = "inline-block";
-
-  if (!isPro) {
-    usage++;
-    setUsage(usage);
-    document.getElementById("usageDisplay").innerText = `目前使用次數：${usage}/${MAX_USES}`;
-  }
 }
+
+let usage = getUsage();
+document.addEventListener("DOMContentLoaded", () => {
+  updateLanguageOptions();
+  updateUsageDisplay();
+  document.getElementById("proToggle").addEventListener("change", updateLanguageOptions);
+});
