@@ -1,18 +1,10 @@
+import logging
 import os
 import requests
-import logging
-from flask import Flask, request, send_file, send_from_directory, after_this_request, jsonify
-from gtts import gTTS
-import tempfile
-
-logging.basicConfig(level=logging.DEBUG)  # 開啟 debug 訊息
-
-app = Flask(__name__, static_folder="../frontend", static_url_path="")
+from flask import request, jsonify
 
 HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 HF_API_KEY = os.environ.get("HF_API_KEY")
-logging.debug("[BOOT] HF_API_KEY is set: %s", bool(HF_API_KEY))
-
 
 @app.route("/api/dialogue", methods=["POST"])
 def generate_dialogue():
@@ -21,34 +13,46 @@ def generate_dialogue():
         user_input = data.get("text", "").strip()
         if not user_input:
             logging.warning("Empty input received.")
-            return {"error": "No input provided."}, 400
+            return jsonify({"error": "No input provided."}), 400
 
         prompt = f"請將這句話補成一段自然對話：{user_input}"
         logging.debug("Prompt to HF: %s", prompt)
 
-        if HF_API_KEY is None:
-            logging.error("HF_API_KEY is missing")
-            return {"error": "HF_API_KEY not set on server"}, 500
+        if not HF_API_KEY:
+            logging.error("HF_API_KEY is missing or unset.")
+            return jsonify({"error": "Server misconfiguration: HF_API_KEY not set"}), 500
 
         headers = {
             "Authorization": f"Bearer {HF_API_KEY}",
             "Content-Type": "application/json"
         }
 
-        res = requests.post(HF_API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
-        logging.debug("HF API response code: %s", res.status_code)
-        logging.debug("HF API raw response: %s", res.text)
+        # 發送 Hugging Face 請求
+        response = requests.post(
+            HF_API_URL,
+            headers=headers,
+            json={"inputs": prompt},
+            timeout=30
+        )
 
-        res.raise_for_status()
+        logging.debug("HF status code: %s", response.status_code)
+        logging.debug("HF response body: %s", response.text)
 
-        result = res.json()
-        output = result[0].get("generated_text", "") if isinstance(result, list) else result.get("generated_text", "")
-        logging.debug("Extracted output: %s", output)
+        response.raise_for_status()
+
+        result = response.json()
+        if isinstance(result, list):
+            output = result[0].get("generated_text", "")
+        else:
+            output = result.get("generated_text", "")
+
+        logging.info("Generated dialogue: %s", output)
         return jsonify({"dialogue": output.strip()})
 
     except requests.exceptions.RequestException as e:
-        logging.exception("HuggingFace request failed.")
-        return {"error": f"HuggingFace API error: {str(e)}"}, 500
+        logging.exception("Hugging Face request error.")
+        return jsonify({"error": f"HuggingFace API error: {str(e)}"}), 500
+
     except Exception as e:
-        logging.exception("Unexpected server error.")
-        return {"error": f"Internal server error: {str(e)}"}, 500
+        logging.exception("Unhandled error in /api/dialogue.")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
