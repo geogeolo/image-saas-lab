@@ -2,19 +2,6 @@ const MAX_USES = 5;
 const USAGE_KEY = 'usage';
 const DATE_KEY = 'usageDate';
 
-const langCodeMap = {
-  "zh-tw": "zh",
-  "en": "en",
-  "ja": "ja",
-  "fr": "fr",
-  "de": "de",
-  "ko": "ko",
-  "es": "es",
-  "hi": "hi",
-  "id": "id",
-  "vi": "vi"
-};
-
 function getTodayDate() {
   return new Date().toISOString().split('T')[0];
 }
@@ -85,37 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateLanguageOptions();
 });
 
-async function translateText(text, targetLangCode) {
-  try {
-    const res = await fetch("https://libretranslate.de/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        q: text,
-        source: "auto",
-        target: targetLangCode,
-        format: "text"
-      })
-    });
-
-    if (!res.ok) {
-      console.error("翻譯失敗", await res.text());
-      return null;
-    }
-
-    const data = await res.json();
-    if (!data.translatedText || typeof data.translatedText !== "string") {
-      console.error("翻譯回傳異常", data);
-      return null;
-    }
-
-    return data.translatedText;
-  } catch (err) {
-    console.error("翻譯過程錯誤", err);
-    return null;
-  }
-}
-
 async function generateSpeech() {
   const button = document.querySelector("button");
   button.disabled = true;
@@ -145,21 +101,10 @@ async function generateSpeech() {
     }
   }
 
-  const targetLangCode = langCodeMap[selectedLang] || "en";
-
-  console.log("[generateSpeech] 原始文字：", inputText);
-  const translated = await translateText(inputText, targetLangCode);
-  if (!translated || translated === inputText) {
-    alert("翻譯失敗或與原文相同，請確認內容與網路。");
-    button.disabled = false;
-    return;
-  }
-  console.log("[generateSpeech] 翻譯後：", translated);
-
   const res = await fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: translated, lang: selectedLang })
+    body: JSON.stringify({ text: inputText, lang: selectedLang })
   });
 
   if (!res.ok) {
