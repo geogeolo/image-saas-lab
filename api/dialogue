@@ -1,4 +1,8 @@
 @app.route("/api/dialogue", methods=["POST"])
+
+print("HF_API_KEY is None:", HF_API_KEY is None)
+print("Sending request to:", HF_API_URL)
+
 def generate_dialogue():
     try:
         data = request.get_json()
