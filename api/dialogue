@@ -2,14 +2,16 @@
 def generate_dialogue():
     try:
         data = request.get_json()
-        user_input = data.get("text", "")
+        user_input = data.get("text", "").strip()
         if not user_input:
             return {"error": "No input provided."}, 400
-        
-        print("HF_API_KEY is None:", HF_API_KEY is None)
-        print("Sending request to:", HF_API_URL)
 
         prompt = f"請將這句話補成一段自然對話：{user_input}"
+        print("[DEBUG] Prompt to HF:", prompt)
+
+        if HF_API_KEY is None:
+            print("[ERROR] HF_API_KEY is missing")
+            return {"error": "HF_API_KEY not set on server"}, 500
 
         headers = {
             "Authorization": f"Bearer {HF_API_KEY}",
@@ -17,12 +19,19 @@ def generate_dialogue():
         }
 
         res = requests.post(HF_API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
-        res.raise_for_status()  # <--- 讓它丟出 HTTP 例外
-        
+        print("[DEBUG] HF response status:", res.status_code)
+
+        res.raise_for_status()  # 若失敗將丟出 exception
+
         result = res.json()
+        print("[DEBUG] HF raw result:", result)
+
         output = result[0].get("generated_text", "") if isinstance(result, list) else result.get("generated_text", "")
         return {"dialogue": output.strip()}
-    
+
+    except requests.exceptions.RequestException as e:
+        print("[HF API ERROR]", str(e))
+        return {"error": f"HuggingFace request error: {str(e)}"}, 500
     except Exception as e:
-        print("Hugging Face API failed:", str(e))
-        return {"error": f"HuggingFace error: {str(e)}"}, 500
+        print("[SERVER ERROR]", str(e))
+        return {"error": f"Internal server error: {str(e)}"}, 500
