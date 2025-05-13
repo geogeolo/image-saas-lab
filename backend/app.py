@@ -12,8 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
 # Hugging Face 設定
-HF_API_URL = "https://api-inference.huggingface.co/models/qwen/Qwen1.5-0.5B-Chat"
-
+HF_API_URL = "https://api-inference.huggingface.co/models/liangjiyuan/Chat-Chinese-LLM"
 HF_API_KEY = os.environ.get("HF_API_KEY")
 logging.debug("[BOOT] HF_API_KEY is set: %s", bool(HF_API_KEY))
 
