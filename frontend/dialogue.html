@@ -8,7 +8,8 @@
 </head>
 <body>
   <h1>語音情境模擬器</h1>
-
+  print("HF_API_KEY is None:", HF_API_KEY is None)
+  print("Sending request to:", HF_API_URL)
   <textarea id="dialogueInput" rows="4" cols="50" placeholder="請輸入一句話，例如：我想買咖啡"></textarea><br><br>
   <button onclick="simulateDialogue()">生成情境並播放</button>
 
