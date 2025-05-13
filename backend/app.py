@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, send_from_directory
+from flask import Flask, request, send_file, send_from_directory, after_this_request
 from gtts import gTTS
 import tempfile
 import os
@@ -20,13 +20,30 @@ def serve_static(path):
 @app.route("/api/tts", methods=["POST"])
 def tts():
     data = request.get_json()
-    text = data.get("text", "")
+    text = data.get("text", "").strip()
     lang = data.get("lang", "en")
-    tts = gTTS(text=text, lang=lang)
+    slow = data.get("slow", False)
+
+    if not text:
+        return {"error": "empty text"}, 400
+
+    try:
+        tts = gTTS(text=text, lang=lang, slow=slow)
+    except ValueError as e:
+        return {"error": str(e)}, 400
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
         tts.save(fp.name)
-        return send_file(fp.name, mimetype="audio/mpeg")
+
+    @after_this_request
+    def cleanup(resp):
+        try:
+            os.remove(fp.name)
+        except Exception:
+            pass
+        return resp
+
+    return send_file(fp.name, mimetype="audio/mpeg")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
