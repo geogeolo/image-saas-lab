@@ -1,6 +1,9 @@
 const MAX_USES = 5;
 const todayKey = `usage-${new Date().toISOString().split('T')[0]}`;
 
+let usage = getUsage();
+let lastSpeechURL = null;  // 儲存語音 blob 的下載連結
+
 function getUsage() {
   const raw = localStorage.getItem(todayKey);
   const parsed = parseInt(raw);
@@ -113,29 +116,16 @@ async function generateSpeech() {
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
+    lastSpeechURL = url;
 
-    // 播放語音
     const audio = new Audio(url);
     audio.play();
 
-    // 自動下載語音
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = `tts_${lang}_${timestamp}.mp3`;
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // 記錄使用次數
     if (!isPro) {
       usage++;
       setUsage(usage);
       updateUsageDisplay();
     }
-
   } catch (err) {
     console.error("[ERROR] 語音請求失敗:", err);
     alert("發生錯誤，請稍後再試");
@@ -144,7 +134,25 @@ async function generateSpeech() {
   button.disabled = false;
 }
 
-let usage = getUsage();
+function downloadSpeech() {
+  if (!lastSpeechURL) {
+    alert("請先產生語音");
+    return;
+  }
+
+  const lang = document.getElementById("langSelect").value;
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const filename = `tts_${lang}_${timestamp}.mp3`;
+
+  const link = document.createElement("a");
+  link.href = lastSpeechURL;
+  link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   updateLanguageOptions();
   updateUsageDisplay();
