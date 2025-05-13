@@ -113,14 +113,29 @@ async function generateSpeech() {
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
+
+    // 播放語音
     const audio = new Audio(url);
     audio.play();
 
+    // 自動下載語音
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `tts_${lang}_${timestamp}.mp3`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 記錄使用次數
     if (!isPro) {
       usage++;
       setUsage(usage);
       updateUsageDisplay();
     }
+
   } catch (err) {
     console.error("[ERROR] 語音請求失敗:", err);
     alert("發生錯誤，請稍後再試");
