@@ -21,7 +21,7 @@ def generate_dialogue():
         res = requests.post(HF_API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
         print("[DEBUG] HF response status:", res.status_code)
 
-        res.raise_for_status()  # 若失敗將丟出 exception
+        res.raise_for_status()
 
         result = res.json()
         print("[DEBUG] HF raw result:", result)
