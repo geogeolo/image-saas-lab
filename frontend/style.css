@@ -50,3 +50,10 @@ button:hover {
 label {
   margin-right: 10px;
 }
+
+select {
+  width: 200px;
+  padding: 6px;
+  font-size: 16px;
+}
+
