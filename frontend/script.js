@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function translateText(text, targetLangCode) {
   try {
-    const LIBRE_URL = "https://libretranslate.let.rip/translate", {
+    const res = await fetch("https://libretranslate.let.rip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
